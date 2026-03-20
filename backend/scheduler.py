@@ -1,8 +1,6 @@
 import asyncio
 import traceback
 from datetime import datetime
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from apscheduler.triggers.cron import CronTrigger
 
 from crawler import crawl
 from database import SessionLocal
@@ -63,15 +61,3 @@ async def run_crawl():
         db.close()
 
 
-scheduler = AsyncIOScheduler()
-
-
-def start_scheduler():
-    scheduler.add_job(
-        run_crawl,
-        CronTrigger(day_of_week="mon", hour=0, minute=0),
-        id="weekly_crawl",
-        replace_existing=True,
-    )
-    scheduler.start()
-    print("[Scheduler] Started. Weekly crawl every Monday 00:00 UTC.")

@@ -1,23 +1,15 @@
 import os
-from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
 from database import get_db, engine
 from models import Base, CrawlSession, Product
-from scheduler import start_scheduler, run_crawl
+from scheduler import run_crawl
 
 Base.metadata.create_all(bind=engine)
 
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    start_scheduler()
-    yield
-
-
-app = FastAPI(title="PalaceHistory API", lifespan=lifespan)
+app = FastAPI(title="PalaceHistory API")
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
