@@ -7,4 +7,4 @@ apscheduler
 python-dotenv
 beautifulsoup4
 lxml
-playwright
+playwright>=1.40.0
