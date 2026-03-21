@@ -78,3 +78,22 @@ async def trigger_crawl():
     """수동으로 크롤링 트리거 (관리자용)"""
     await run_crawl()
     return {"message": "Crawl triggered successfully"}
+
+
+@app.get("/debug-crawl")
+async def debug_crawl():
+    from playwright.async_api import async_playwright
+    async with async_playwright() as p:
+        browser = await p.chromium.launch(headless=True)
+        context = await browser.new_context(locale="en-US", timezone_id="America/New_York")
+        page = await context.new_page()
+        await page.goto("https://shop.palaceskateboards.com/collections/new", wait_until="networkidle", timeout=30000)
+        cards = await page.eval_on_selector_all(
+            'a[href*="/products/"]',
+            """els => els.slice(0, 3).map(e => ({
+                href: e.href,
+                text: e.innerText.trim().slice(0, 200),
+            }))"""
+        )
+        await browser.close()
+    return {"cards": cards}
