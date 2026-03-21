@@ -80,6 +80,17 @@ async def trigger_crawl():
     return {"message": "Crawl triggered successfully"}
 
 
+@app.delete("/weeks/{week_label}")
+def delete_week(week_label: str, db: Session = Depends(get_db)):
+    session = db.query(CrawlSession).filter(CrawlSession.week_label == week_label).first()
+    if not session:
+        raise HTTPException(status_code=404, detail="Week not found")
+    db.query(Product).filter(Product.session_id == session.id).delete()
+    db.delete(session)
+    db.commit()
+    return {"message": f"{week_label} 삭제 완료"}
+
+
 @app.get("/debug-crawl")
 async def debug_crawl():
     from playwright.async_api import async_playwright
