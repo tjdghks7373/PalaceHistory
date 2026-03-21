@@ -40,7 +40,8 @@ const Select = styled.select`
   background-color: var(--c-bg);
   color: var(--c-text);
   border: 1px solid var(--c-border-hover);
-  padding: 9px 36px 9px 14px;
+  border-radius: 8px;
+  padding: 9px 40px 9px 14px;
   font-size: 12px;
   font-family: inherit;
   font-weight: 700;
@@ -62,14 +63,15 @@ const Select = styled.select`
 
   @media (max-width: 480px) {
     font-size: 11px;
-    padding: 8px 32px 8px 12px;
+    padding: 8px 36px 8px 12px;
   }
 `;
 
 const Arrow = styled.span`
   position: absolute;
-  right: 12px;
+  right: 13px;
   pointer-events: none;
   color: var(--c-text-muted);
-  font-size: 11px;
+  font-size: 14px;
+  line-height: 1;
 `;

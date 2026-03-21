@@ -67,6 +67,8 @@ const Card = styled.a`
   display: block;
   background-color: var(--c-surface);
   border: 1px solid var(--c-border);
+  border-radius: 8px;
+  overflow: hidden;
   transition: border-color 0.2s;
   cursor: pointer;
 
@@ -100,7 +102,7 @@ const Badges = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-  align-items: center;
+  align-items: stretch;
 `;
 
 const Badge = styled.span<{ $type: "new" | "sold" }>`
@@ -110,6 +112,7 @@ const Badge = styled.span<{ $type: "new" | "sold" }>`
   letter-spacing: 0.1em;
   border-radius: 4px;
   text-align: center;
+  white-space: nowrap;
   background-color: ${({ $type }) =>
     $type === "new" ? "var(--c-badge-new-bg)" : "var(--c-border-hover)"};
   color: ${({ $type }) =>
