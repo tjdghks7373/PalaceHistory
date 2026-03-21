@@ -100,6 +100,7 @@ const Badges = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+  align-items: center;
 `;
 
 const Badge = styled.span<{ $type: "new" | "sold" }>`

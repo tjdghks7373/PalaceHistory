@@ -9,57 +9,67 @@ interface Props {
   onChange: (week: string) => void;
 }
 
+function formatWeekLabel(label: string): string {
+  const [year, week] = label.split("-W");
+  return `${year}년 ${parseInt(week, 10)}주차`;
+}
+
 export default function WeekSelector({ weeks, selected, onChange }: Props) {
   return (
-    <Container>
-      <Label>주차 선택</Label>
+    <SelectWrapper>
       <Select value={selected} onChange={(e) => onChange(e.target.value)}>
         {weeks.map((w) => (
           <option key={w.week_label} value={w.week_label}>
-            {w.week_label} ({w.product_count}개)
+            {formatWeekLabel(w.week_label)}
           </option>
         ))}
       </Select>
-    </Container>
+      <Arrow>▾</Arrow>
+    </SelectWrapper>
   );
 }
 
-const Container = styled.div`
-  display: flex;
+const SelectWrapper = styled.div`
+  position: relative;
+  display: inline-flex;
   align-items: center;
-  gap: 12px;
-`;
-
-const Label = styled.label`
-  font-size: 11px;
-  color: var(--c-text-muted);
-  letter-spacing: 0.1em;
-  white-space: nowrap;
 `;
 
 const Select = styled.select`
-  background-color: var(--c-surface);
+  appearance: none;
+  background-color: var(--c-bg);
   color: var(--c-text);
-  border: 1px solid var(--c-border);
-  padding: 8px 12px;
-  font-size: 13px;
+  border: 1px solid var(--c-border-hover);
+  padding: 9px 36px 9px 14px;
+  font-size: 12px;
   font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   cursor: pointer;
   outline: none;
   transition: border-color 0.2s;
-  min-height: 40px;
 
+  &:hover,
   &:focus {
-    border-color: var(--c-border-hover);
+    border-color: var(--c-text);
   }
 
   option {
-    background-color: var(--c-surface);
+    background-color: var(--c-bg);
     color: var(--c-text);
+    font-weight: 400;
   }
 
   @media (max-width: 480px) {
-    font-size: 12px;
-    padding: 8px 10px;
+    font-size: 11px;
+    padding: 8px 32px 8px 12px;
   }
+`;
+
+const Arrow = styled.span`
+  position: absolute;
+  right: 12px;
+  pointer-events: none;
+  color: var(--c-text-muted);
+  font-size: 11px;
 `;

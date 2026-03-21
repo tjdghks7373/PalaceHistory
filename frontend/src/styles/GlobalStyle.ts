@@ -5,7 +5,7 @@ const GlobalStyle = createGlobalStyle`
     --c-bg: #0a0a0a;
     --c-surface: #111;
     --c-surface-hover: #161616;
-    --c-border: #1a1a1a;
+    --c-border: #1e1e1e;
     --c-border-hover: #333;
     --c-text: #f0f0f0;
     --c-text-secondary: #ccc;
@@ -14,12 +14,13 @@ const GlobalStyle = createGlobalStyle`
     --c-overlay: rgba(0, 0, 0, 0.75);
     --c-badge-new-bg: #fff;
     --c-badge-new-text: #000;
+    --c-accent: #FF2D2D;
   }
 
   [data-theme="light"] {
-    --c-bg: #f7f7f7;
+    --c-bg: #f5f5f5;
     --c-surface: #fff;
-    --c-surface-hover: #f0f0f0;
+    --c-surface-hover: #ebebeb;
     --c-border: #e0e0e0;
     --c-border-hover: #aaa;
     --c-text: #0a0a0a;
@@ -29,6 +30,7 @@ const GlobalStyle = createGlobalStyle`
     --c-overlay: rgba(0, 0, 0, 0.5);
     --c-badge-new-bg: #000;
     --c-badge-new-text: #fff;
+    --c-accent: #FF2D2D;
   }
 
   *, *::before, *::after {
