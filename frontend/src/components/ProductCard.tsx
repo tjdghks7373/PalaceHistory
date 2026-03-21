@@ -22,8 +22,8 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <>
-      <Card href={product.product_url} target="_blank" rel="noopener noreferrer" onClick={handleCardClick}>
-        <ImageWrapper>
+      <Card href={product.product_url} target="_blank" rel="noopener noreferrer" onClick={handleCardClick} $soldOut={!product.available}>
+        <ImageWrapper $soldOut={!product.available}>
           {product.image_url ? (
             <Image
               src={product.image_url}
@@ -41,7 +41,7 @@ export default function ProductCard({ product }: Props) {
           </Badges>
           {product.size_chart && <SizeBadge>SIZE</SizeBadge>}
         </ImageWrapper>
-        <Info>
+        <Info $soldOut={!product.available}>
           <Name>{product.name}</Name>
           <Prices>
             <PriceKRW>
@@ -63,25 +63,29 @@ export default function ProductCard({ product }: Props) {
   );
 }
 
-const Card = styled.a`
+const Card = styled.a<{ $soldOut: boolean }>`
   display: block;
   background-color: var(--c-surface);
   border: 1px solid var(--c-border);
   border-radius: 8px;
   overflow: hidden;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, opacity 0.2s;
   cursor: pointer;
+  opacity: ${({ $soldOut }) => ($soldOut ? 0.5 : 1)};
 
   &:hover {
     border-color: var(--c-border-hover);
+    opacity: ${({ $soldOut }) => ($soldOut ? 0.65 : 1)};
   }
 `;
 
-const ImageWrapper = styled.div`
+const ImageWrapper = styled.div<{ $soldOut: boolean }>`
   position: relative;
   aspect-ratio: 1;
   background-color: var(--c-surface-hover);
   overflow: hidden;
+  filter: ${({ $soldOut }) => ($soldOut ? "grayscale(100%)" : "none")};
+  transition: filter 0.2s;
 `;
 
 const NoImage = styled.div`
@@ -131,8 +135,9 @@ const SizeBadge = styled.span`
   color: var(--c-text-muted);
 `;
 
-const Info = styled.div`
+const Info = styled.div<{ $soldOut: boolean }>`
   padding: 10px 12px;
+  opacity: ${({ $soldOut }) => ($soldOut ? 0.6 : 1)};
 
   @media (max-width: 480px) {
     padding: 8px;
