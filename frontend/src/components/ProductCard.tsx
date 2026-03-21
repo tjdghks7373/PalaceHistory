@@ -22,8 +22,8 @@ export default function ProductCard({ product }: Props) {
 
   return (
     <>
-      <Card href={product.product_url} target="_blank" rel="noopener noreferrer" onClick={handleCardClick} $soldOut={!product.available}>
-        <ImageWrapper $soldOut={!product.available}>
+      <Card href={product.product_url} target="_blank" rel="noopener noreferrer" onClick={handleCardClick}>
+        <ImageWrapper>
           {product.image_url ? (
             <Image
               src={product.image_url}
@@ -39,9 +39,8 @@ export default function ProductCard({ product }: Props) {
             {product.is_new && <Badge $type="new">NEW</Badge>}
             {!product.available && <Badge $type="sold">SOLD OUT</Badge>}
           </Badges>
-          {product.size_chart && <SizeBadge>SIZE</SizeBadge>}
         </ImageWrapper>
-        <Info $soldOut={!product.available}>
+        <Info>
           <Name>{product.name}</Name>
           <Prices>
             {product.price_krw > 0 && (
@@ -65,29 +64,25 @@ export default function ProductCard({ product }: Props) {
   );
 }
 
-const Card = styled.a<{ $soldOut: boolean }>`
+const Card = styled.a`
   display: block;
   background-color: var(--c-surface);
   border: 1px solid var(--c-border);
   border-radius: 8px;
   overflow: hidden;
-  transition: border-color 0.2s, opacity 0.2s;
+  transition: border-color 0.2s;
   cursor: pointer;
-  opacity: ${({ $soldOut }) => ($soldOut ? 0.5 : 1)};
 
   &:hover {
     border-color: var(--c-border-hover);
-    opacity: ${({ $soldOut }) => ($soldOut ? 0.65 : 1)};
   }
 `;
 
-const ImageWrapper = styled.div<{ $soldOut: boolean }>`
+const ImageWrapper = styled.div`
   position: relative;
   aspect-ratio: 1;
   background-color: var(--c-surface-hover);
   overflow: hidden;
-  filter: ${({ $soldOut }) => ($soldOut ? "grayscale(100%)" : "none")};
-  transition: filter 0.2s;
 `;
 
 const NoImage = styled.div`
@@ -125,21 +120,9 @@ const Badge = styled.span<{ $type: "new" | "sold" }>`
     $type === "new" ? "var(--c-badge-new-text)" : "var(--c-text-muted)"};
 `;
 
-const SizeBadge = styled.span`
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  padding: 2px 6px;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  background-color: var(--c-border);
-  color: var(--c-text-muted);
-`;
 
-const Info = styled.div<{ $soldOut: boolean }>`
+const Info = styled.div`
   padding: 10px 12px;
-  opacity: ${({ $soldOut }) => ($soldOut ? 0.6 : 1)};
 
   @media (max-width: 480px) {
     padding: 8px;
