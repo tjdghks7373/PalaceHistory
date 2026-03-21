@@ -10,8 +10,28 @@ interface Props {
 }
 
 function formatWeekLabel(label: string): string {
-  const [year, week] = label.split("-W");
-  return `${year}년 ${parseInt(week, 10)}주차`;
+  const [yearStr, weekStr] = label.split("-W");
+  const year = parseInt(yearStr, 10);
+  const isoWeek = parseInt(weekStr, 10);
+
+  // ISO 주차의 월요일 날짜 계산
+  const jan4 = new Date(year, 0, 4);
+  const dayOfWeek = jan4.getDay() || 7;
+  const mondayOfWeek1 = new Date(jan4);
+  mondayOfWeek1.setDate(jan4.getDate() - dayOfWeek + 1);
+  const monday = new Date(mondayOfWeek1);
+  monday.setDate(mondayOfWeek1.getDate() + (isoWeek - 1) * 7);
+
+  const month = monday.getMonth();
+  const monthNum = month + 1;
+
+  // 해당 월의 첫 번째 월요일 계산
+  const firstOfMonth = new Date(monday.getFullYear(), month, 1);
+  const firstDow = firstOfMonth.getDay() || 7;
+  const firstMondayDate = firstDow === 1 ? 1 : 1 + (8 - firstDow);
+  const weekOfMonth = Math.floor((monday.getDate() - firstMondayDate) / 7) + 1;
+
+  return `${monthNum}월 ${weekOfMonth}주차`;
 }
 
 export default function WeekSelector({ weeks, selected, onChange }: Props) {
