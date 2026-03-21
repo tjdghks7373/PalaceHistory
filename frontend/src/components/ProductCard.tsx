@@ -44,10 +44,12 @@ export default function ProductCard({ product }: Props) {
         <Info $soldOut={!product.available}>
           <Name>{product.name}</Name>
           <Prices>
-            <PriceKRW>
-              {product.price_krw.toLocaleString("ko-KR")}원
-            </PriceKRW>
-            <PriceGBP>${product.price_gbp.toFixed(0)}</PriceGBP>
+            {product.price_krw > 0 && (
+              <>
+                <PriceKRW>{product.price_krw.toLocaleString("ko-KR")}원</PriceKRW>
+                <PriceGBP>${product.price_gbp.toFixed(0)}</PriceGBP>
+              </>
+            )}
           </Prices>
         </Info>
       </Card>
