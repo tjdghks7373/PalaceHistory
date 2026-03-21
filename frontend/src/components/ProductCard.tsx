@@ -47,7 +47,7 @@ export default function ProductCard({ product }: Props) {
             <PriceKRW>
               {product.price_krw.toLocaleString("ko-KR")}원
             </PriceKRW>
-            <PriceGBP>£{product.price_gbp.toFixed(0)}</PriceGBP>
+            <PriceGBP>${product.price_gbp.toFixed(0)}</PriceGBP>
           </Prices>
         </Info>
       </Card>

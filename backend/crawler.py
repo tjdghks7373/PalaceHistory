@@ -3,8 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 from playwright.async_api import async_playwright, Browser, BrowserContext
 
-PALACE_COLLECTION_URL = "https://shop.palaceskateboards.com/collections/new"
-EXCHANGE_API = "https://api.frankfurter.app/latest?from=GBP&to=KRW"
+PALACE_COLLECTION_URL = "https://shop-usa.palaceskateboards.com/collections/new"
+EXCHANGE_API = "https://api.frankfurter.app/latest?from=USD&to=KRW"
 
 CUSTOMS_RATE = 1.13
 VAT_RATE = 1.10
@@ -17,8 +17,8 @@ def get_exchange_rate() -> float:
     return data["rates"]["KRW"]
 
 
-def gbp_to_krw(price_gbp: float, rate: float) -> float:
-    krw = price_gbp * rate
+def usd_to_krw(price_usd: float, rate: float) -> float:
+    krw = price_usd * rate
     if krw > DUTY_FREE_KRW:
         krw = krw * CUSTOMS_RATE * VAT_RATE
     return round(krw)
@@ -51,7 +51,7 @@ async def fetch_products(browser: Browser) -> list[dict]:
         'a[href*="/products/"]',
         """els => els.map(e => {
             const text = e.innerText.trim();
-            const priceMatch = text.match(/£([\\d,]+(?:\\.\\d+)?)/);
+            const priceMatch = text.match(/\$([\\d,]+(?:\\.\\d+)?)/);
             const img = e.querySelector('img');
             const soldOut = e.querySelector('[class*="sold"]') !== null
                          || e.innerText.toLowerCase().includes('sold out');
@@ -75,12 +75,12 @@ async def fetch_products(browser: Browser) -> list[dict]:
             continue
         seen.add(handle)
 
-        price_gbp = float(c["price_text"].replace(",", "") or 0)
+        price_usd = float(c["price_text"].replace(",", "") or 0)
         products.append({
             "shopify_id": handle,
             "handle": handle,
             "name": c["name"],
-            "price_gbp": price_gbp,
+            "price_gbp": price_usd,
             "image_url": c["image_url"],
             "product_url": href,
             "available": not c["sold_out"],
@@ -92,7 +92,7 @@ async def fetch_products(browser: Browser) -> list[dict]:
 
 
 async def fetch_size_chart(browser: Browser, handle: str) -> dict | None:
-    url = f"https://shop.palaceskateboards.com/products/{handle}"
+    url = f"https://shop-usa.palaceskateboards.com/products/{handle}"
     context = await _new_context(browser)
     page = await context.new_page()
     try:
@@ -140,7 +140,7 @@ async def crawl() -> dict:
         products = await fetch_products(browser)
 
         for product in products:
-            product["price_krw"] = gbp_to_krw(product["price_gbp"], rate)
+            product["price_krw"] = usd_to_krw(product["price_gbp"], rate)
             product["size_chart"] = await fetch_size_chart(browser, product["handle"])
 
         await browser.close()
