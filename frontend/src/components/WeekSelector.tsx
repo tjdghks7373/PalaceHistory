@@ -31,7 +31,7 @@ function formatWeekLabel(label: string): string {
   const firstMondayDate = firstDow === 1 ? 1 : 1 + (8 - firstDow);
   const weekOfMonth = Math.floor((monday.getDate() - firstMondayDate) / 7) + 1;
 
-  return `${monthNum}월 ${weekOfMonth}주차`;
+  return `${monday.getFullYear()}년 ${monthNum}월 ${weekOfMonth}주차`;
 }
 
 export default function WeekSelector({ weeks, selected, onChange }: Props) {
