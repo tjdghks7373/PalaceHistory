@@ -104,10 +104,12 @@ const Badges = styled.div`
 `;
 
 const Badge = styled.span<{ $type: "new" | "sold" }>`
-  padding: 2px 6px;
+  padding: 3px 8px;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.1em;
+  border-radius: 4px;
+  text-align: center;
   background-color: ${({ $type }) =>
     $type === "new" ? "var(--c-badge-new-bg)" : "var(--c-border-hover)"};
   color: ${({ $type }) =>
