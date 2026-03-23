@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Header from "@/components/Header";
-import WeekSelector from "@/components/WeekSelector";
+import WeekSelector, { formatWeekLabel } from "@/components/WeekSelector";
 import ProductCard from "@/components/ProductCard";
 import { getWeeks, getProducts, Week, Product } from "@/lib/api";
 
@@ -69,7 +69,7 @@ export default function HistoryPage() {
       <WeekHero>
         <HeroLeft>
           <HeroLabel>WEEKLY DROP ARCHIVE</HeroLabel>
-          <HeroTitle>{selectedWeek || "—"}</HeroTitle>
+          <HeroTitle>{selectedWeek ? formatWeekLabel(selectedWeek) : "—"}</HeroTitle>
           <HeroMeta>
             {selectedWeekData?.product_count ?? products.length}개 제품
             {exchangeRate > 0 && (

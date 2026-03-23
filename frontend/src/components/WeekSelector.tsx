@@ -9,7 +9,7 @@ interface Props {
   onChange: (week: string) => void;
 }
 
-function formatWeekLabel(label: string): string {
+export function formatWeekLabel(label: string): string {
   const [yearStr, weekStr] = label.split("-W");
   const year = parseInt(yearStr, 10);
   const isoWeek = parseInt(weekStr, 10);
