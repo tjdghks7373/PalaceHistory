@@ -1,17 +1,32 @@
 import os
 from datetime import datetime
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 from database import get_db, engine
 from models import Base, CrawlSession, Product
 from scheduler import run_crawl
 
+scheduler = AsyncIOScheduler()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 매주 금요일 오전 11시 UTC (Palace 드롭 시간)
+    scheduler.add_job(run_crawl, CronTrigger(day_of_week="fri", hour=11, minute=0, timezone="UTC"))
+    scheduler.start()
+    print("[Scheduler] 자동 크롤링 스케줄 등록: 매주 금요일 11:00 UTC")
+    yield
+    scheduler.shutdown()
+
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="PalaceHistory API")
+app = FastAPI(title="PalaceHistory API", lifespan=lifespan)
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
