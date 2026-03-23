@@ -1,6 +1,8 @@
 import os
-from fastapi import FastAPI, Depends, HTTPException
+from datetime import datetime
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import get_db, engine
@@ -78,6 +80,21 @@ async def trigger_crawl():
     """수동으로 크롤링 트리거 (관리자용)"""
     await run_crawl()
     return {"message": "Crawl triggered successfully"}
+
+
+class BulkCrawlRequest(BaseModel):
+    start_date: str = "2026-01-02"
+    end_date: str = "2026-03-21"
+
+
+@app.post("/bulk-crawl")
+async def start_bulk_crawl(request: BulkCrawlRequest, background_tasks: BackgroundTasks):
+    """Wayback Machine으로 과거 주차 데이터 일괄 수집"""
+    from bulk_crawl import bulk_crawl
+    start = datetime.strptime(request.start_date, "%Y-%m-%d")
+    end = datetime.strptime(request.end_date, "%Y-%m-%d")
+    background_tasks.add_task(bulk_crawl, start, end)
+    return {"message": f"Bulk crawl 시작: {request.start_date} ~ {request.end_date} (Render 로그에서 진행상황 확인)"}
 
 
 @app.delete("/weeks/{week_label}")
