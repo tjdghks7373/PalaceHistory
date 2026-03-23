@@ -108,6 +108,31 @@ def delete_week(week_label: str, db: Session = Depends(get_db)):
     return {"message": f"{week_label} 삭제 완료"}
 
 
+@app.get("/debug-cdx")
+async def debug_cdx():
+    """Wayback Machine CDX API 연결 테스트"""
+    import requests
+    results = {}
+    urls = [
+        "shop-usa.palaceskateboards.com/collections/new/products.json",
+        "shop-usa.palaceskateboards.com/collections/new",
+        "shop.palaceskateboards.com/collections/new",
+    ]
+    for url in urls:
+        cdx_url = (
+            f"https://web.archive.org/cdx/search/cdx"
+            f"?url={url}&output=json&fl=timestamp,statuscode"
+            f"&from=20260109000000&to=20260116000000&limit=5"
+        )
+        try:
+            resp = requests.get(cdx_url, timeout=20)
+            data = resp.json()
+            results[url] = {"rows": len(data), "sample": data[:3]}
+        except Exception as e:
+            results[url] = {"error": str(e)}
+    return results
+
+
 @app.get("/debug-crawl")
 async def debug_crawl():
     from playwright.async_api import async_playwright

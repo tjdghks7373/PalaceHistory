@@ -38,7 +38,7 @@ def find_wayback_snapshot(date: datetime) -> tuple[str, str] | None:
 
     for url_key, url in [("json", PALACE_PRODUCTS_JSON), ("html", PALACE_COLLECTION_PAGE)]:
         cdx_url = (
-            f"http://web.archive.org/cdx/search/cdx"
+            f"https://web.archive.org/cdx/search/cdx"
             f"?url={url}"
             f"&output=json&fl=timestamp,statuscode"
             f"&from={ts_from}&to={ts_to}"
