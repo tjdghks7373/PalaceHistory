@@ -1,10 +1,12 @@
 import requests
+from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 
 from database import SessionLocal
 from models import CrawlSession, Product
 
-PALACE_PRODUCTS_URL = "https://shop-usa.palaceskateboards.com/collections/new/products.json"
+PALACE_PRODUCTS_JSON = "shop-usa.palaceskateboards.com/collections/new/products.json"
+PALACE_COLLECTION_PAGE = "shop-usa.palaceskateboards.com/collections/new"
 CUSTOMS_RATE = 1.13
 VAT_RATE = 1.10
 DUTY_FREE_KRW = 200000
@@ -29,40 +31,46 @@ def get_historical_exchange_rate(date: datetime) -> float:
         return resp.json()["rates"]["KRW"]
 
 
-def find_wayback_snapshot(date: datetime) -> str | None:
-    """드롭 당일 정오 이후 ~ 다음 월요일 사이 스냅샷 탐색"""
-    ts_from = date.strftime("%Y%m%d120000")
-    ts_to = (date + timedelta(days=3)).strftime("%Y%m%d000000")
-    cdx_url = (
-        f"http://web.archive.org/cdx/search/cdx"
-        f"?url={PALACE_PRODUCTS_URL}&limit=250"
-        f"&output=json&fl=timestamp,statuscode"
-        f"&filter=statuscode:200"
-        f"&from={ts_from}&to={ts_to}"
-    )
-    try:
-        resp = requests.get(cdx_url, timeout=20)
-        data = resp.json()
-        if len(data) <= 1:
-            return None
-        # 스냅샷 중 가장 이른 것 반환
-        return data[1][0]
-    except Exception:
-        return None
+def find_wayback_snapshot(date: datetime) -> tuple[str, str] | None:
+    """드롭 당일부터 7일 이내 스냅샷 탐색. (timestamp, url_type) 반환"""
+    ts_from = date.strftime("%Y%m%d000000")
+    ts_to = (date + timedelta(days=7)).strftime("%Y%m%d000000")
+
+    for url_key, url in [("json", PALACE_PRODUCTS_JSON), ("html", PALACE_COLLECTION_PAGE)]:
+        cdx_url = (
+            f"http://web.archive.org/cdx/search/cdx"
+            f"?url={url}"
+            f"&output=json&fl=timestamp,statuscode"
+            f"&from={ts_from}&to={ts_to}"
+            f"&limit=10"
+        )
+        try:
+            resp = requests.get(cdx_url, timeout=20)
+            resp.raise_for_status()
+            data = resp.json()
+            print(f"[BulkCrawl] CDX 응답 ({url_key}): {len(data)}행")
+            for row in data[1:]:
+                if row[1] in ("200", "301", "302"):
+                    print(f"[BulkCrawl] 스냅샷 발견 ({url_key}): {row[0]}")
+                    return row[0], url_key
+        except Exception as e:
+            print(f"[BulkCrawl] CDX 오류 ({url_key}): {e}")
+
+    return None
 
 
-def fetch_products_from_wayback(timestamp: str) -> list[dict]:
-    """Wayback Machine에서 아카이브된 Shopify JSON 파싱"""
-    url = f"https://web.archive.org/web/{timestamp}if_/{PALACE_PRODUCTS_URL}?limit=250"
+def fetch_products_from_wayback_json(timestamp: str) -> list[dict]:
+    """Wayback Machine 아카이브된 Shopify JSON 파싱"""
+    url = f"https://web.archive.org/web/{timestamp}if_/https://{PALACE_PRODUCTS_JSON}?limit=250"
     try:
         resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
         data = resp.json()
         products = []
         for p in data.get("products", []):
             available = any(v.get("available", False) for v in p.get("variants", []))
             price_usd = float(p["variants"][0]["price"]) if p.get("variants") else 0
             image_url = p["images"][0]["src"] if p.get("images") else ""
-
             products.append({
                 "shopify_id": str(p["id"]),
                 "handle": p["handle"],
@@ -74,7 +82,47 @@ def fetch_products_from_wayback(timestamp: str) -> list[dict]:
             })
         return products
     except Exception as e:
-        print(f"[BulkCrawl] Wayback fetch error ({timestamp}): {e}")
+        print(f"[BulkCrawl] JSON fetch 오류 ({timestamp}): {e}")
+        return []
+
+
+def fetch_products_from_wayback_html(timestamp: str) -> list[dict]:
+    """Wayback Machine 아카이브된 HTML에서 Shopify 제품 파싱"""
+    url = f"https://web.archive.org/web/{timestamp}if_/https://{PALACE_COLLECTION_PAGE}"
+    try:
+        resp = requests.get(url, timeout=30)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, "lxml")
+
+        products = []
+        seen = set()
+        for a in soup.select('a[href*="/products/"]'):
+            href = a.get("href", "")
+            if "/products/" not in href:
+                continue
+            handle = href.rstrip("/").split("/products/")[-1]
+            if not handle or handle in seen:
+                continue
+            seen.add(handle)
+
+            name = a.get_text(strip=True).split("\n")[0] or handle
+            img = a.find("img")
+            image_url = img["src"] if img and img.get("src") else ""
+            if image_url.startswith("//"):
+                image_url = "https:" + image_url
+
+            products.append({
+                "shopify_id": handle,
+                "handle": handle,
+                "name": name,
+                "price_gbp": 0,
+                "image_url": image_url,
+                "product_url": f"https://shop-usa.palaceskateboards.com/products/{handle}",
+                "available": True,
+            })
+        return products
+    except Exception as e:
+        print(f"[BulkCrawl] HTML fetch 오류 ({timestamp}): {e}")
         return []
 
 
@@ -131,15 +179,17 @@ async def bulk_crawl(start_date: datetime, end_date: datetime) -> dict:
 
             print(f"[BulkCrawl] {week_label} ({date_str}) 처리 중...")
 
-            snapshot_ts = find_wayback_snapshot(friday)
-            if not snapshot_ts:
+            snapshot = find_wayback_snapshot(friday)
+            if not snapshot:
                 print(f"[BulkCrawl] {week_label} 스냅샷 없음")
                 results.append({"week": week_label, "date": date_str, "status": "no_snapshot"})
                 continue
 
-            print(f"[BulkCrawl] 스냅샷 발견: {snapshot_ts}")
-
-            products = fetch_products_from_wayback(snapshot_ts)
+            snapshot_ts, url_type = snapshot
+            if url_type == "json":
+                products = fetch_products_from_wayback_json(snapshot_ts)
+            else:
+                products = fetch_products_from_wayback_html(snapshot_ts)
             if not products:
                 print(f"[BulkCrawl] {week_label} 제품 없음")
                 results.append({"week": week_label, "date": date_str, "status": "no_products"})
