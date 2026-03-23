@@ -66,6 +66,7 @@ export default function ProductCard({ product }: Props) {
           name={product.name}
           sizeChart={product.size_chart}
           imageUrl={product.image_url}
+          productUrl={product.product_url}
           onClose={() => setShowSizeChart(false)}
         />
       )}
