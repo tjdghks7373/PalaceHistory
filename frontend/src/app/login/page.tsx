@@ -19,7 +19,7 @@ export default function LoginPage() {
   const btnRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (status === "authenticated") router.push("/weeks");
+    if (status === "authenticated") router.push("/history");
   }, [status, router]);
 
   useEffect(() => {

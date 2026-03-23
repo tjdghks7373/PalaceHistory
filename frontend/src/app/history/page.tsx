@@ -1,19 +1,17 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, Suspense } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import styled from "styled-components";
 import Header from "@/components/Header";
 import WeekSelector, { formatWeekLabel } from "@/components/WeekSelector";
 import ProductCard from "@/components/ProductCard";
 import { getWeeks, getProducts, Week, Product } from "@/lib/api";
 
-function HistoryContent() {
+export default function HistoryPage() {
   const { status } = useSession();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const weekParam = searchParams.get("week") ?? "";
 
   const [weeks, setWeeks] = useState<Week[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<string>("");
@@ -30,11 +28,7 @@ function HistoryContent() {
     if (status === "authenticated") {
       getWeeks().then((data) => {
         setWeeks(data);
-        if (weekParam && data.some((w) => w.week_label === weekParam)) {
-          setSelectedWeek(weekParam);
-        } else if (data.length > 0) {
-          setSelectedWeek(data[0].week_label);
-        }
+        if (data.length > 0) setSelectedWeek(data[0].week_label);
       });
     }
   }, [status]);
@@ -74,7 +68,6 @@ function HistoryContent() {
       {/* Week Hero */}
       <WeekHero>
         <HeroLeft>
-          <BackButton onClick={() => router.push("/weeks")}>← 목록으로</BackButton>
           <HeroLabel>WEEKLY DROP ARCHIVE</HeroLabel>
           <HeroTitle>{selectedWeek ? formatWeekLabel(selectedWeek) : "—"}</HeroTitle>
           <HeroMeta>
@@ -255,18 +248,6 @@ const StatusText = styled.p`
   padding: 120px 0;
 `;
 
-const BackButton = styled.button`
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--c-text-muted);
-  transition: color 0.15s;
-
-  &:hover {
-    color: var(--c-text);
-  }
-`;
-
 const LoadingText = styled.div`
   display: flex;
   align-items: center;
@@ -275,11 +256,3 @@ const LoadingText = styled.div`
   color: var(--c-text-muted);
   font-size: 24px;
 `;
-
-export default function HistoryPage() {
-  return (
-    <Suspense fallback={<LoadingText>—</LoadingText>}>
-      <HistoryContent />
-    </Suspense>
-  );
-}

@@ -9,11 +9,10 @@ interface Props {
   name: string;
   sizeChart: SizeChart;
   imageUrl?: string;
-  productUrl?: string;
   onClose: () => void;
 }
 
-export default function SizeChartModal({ name, sizeChart, imageUrl, productUrl, onClose }: Props) {
+export default function SizeChartModal({ name, sizeChart, imageUrl, onClose }: Props) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -34,14 +33,7 @@ export default function SizeChartModal({ name, sizeChart, imageUrl, productUrl, 
             <Label>SIZE CHART</Label>
             <Title>{name}</Title>
           </div>
-          <HeaderRight>
-            {productUrl && (
-              <BuyButton href={productUrl} target="_blank" rel="noopener noreferrer">
-                구매하기 →
-              </BuyButton>
-            )}
-            <CloseButton onClick={onClose}>✕</CloseButton>
-          </HeaderRight>
+          <CloseButton onClick={onClose}>✕</CloseButton>
         </Header>
         {imageUrl && (
           <ImageWrapper>
@@ -132,28 +124,6 @@ const Title = styled.h2`
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-const HeaderRight = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-`;
-
-const BuyButton = styled.a`
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  color: var(--c-bg);
-  background-color: var(--c-text);
-  padding: 7px 14px;
-  white-space: nowrap;
-  transition: opacity 0.15s;
-
-  &:hover {
-    opacity: 0.8;
-  }
 `;
 
 const CloseButton = styled.button`
