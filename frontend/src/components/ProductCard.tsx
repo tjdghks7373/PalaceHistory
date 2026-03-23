@@ -65,6 +65,7 @@ export default function ProductCard({ product }: Props) {
         <SizeChartModal
           name={product.name}
           sizeChart={product.size_chart}
+          imageUrl={product.image_url}
           onClose={() => setShowSizeChart(false)}
         />
       )}

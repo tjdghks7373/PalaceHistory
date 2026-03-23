@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect } from "react";
+import Image from "next/image";
 import styled from "styled-components";
 import { SizeChart } from "@/lib/api";
 
 interface Props {
   name: string;
   sizeChart: SizeChart;
+  imageUrl?: string;
   onClose: () => void;
 }
 
-export default function SizeChartModal({ name, sizeChart, onClose }: Props) {
+export default function SizeChartModal({ name, sizeChart, imageUrl, onClose }: Props) {
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -33,6 +35,17 @@ export default function SizeChartModal({ name, sizeChart, onClose }: Props) {
           </div>
           <CloseButton onClick={onClose}>✕</CloseButton>
         </Header>
+        {imageUrl && (
+          <ImageWrapper>
+            <Image
+              src={imageUrl}
+              alt={name}
+              fill
+              style={{ objectFit: "contain" }}
+              sizes="560px"
+            />
+          </ImageWrapper>
+        )}
         <TableWrapper>
           <Table>
             <thead>
@@ -123,6 +136,19 @@ const CloseButton = styled.button`
 
   &:hover {
     color: var(--c-text);
+  }
+`;
+
+const ImageWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  height: 260px;
+  background-color: var(--c-surface-hover);
+  border-bottom: 1px solid var(--c-border);
+  flex-shrink: 0;
+
+  @media (max-width: 480px) {
+    height: 200px;
   }
 `;
 
