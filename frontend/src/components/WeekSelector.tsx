@@ -37,6 +37,14 @@ export function formatWeekLabel(label: string): string {
 export default function WeekSelector({ weeks, selected, onChange }: Props) {
   return (
     <SelectWrapper>
+      <SelectIcon>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+          <line x1="16" y1="2" x2="16" y2="6" />
+          <line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      </SelectIcon>
       <Select value={selected} onChange={(e) => onChange(e.target.value)}>
         {weeks.map((w) => (
           <option key={w.week_label} value={w.week_label}>
@@ -44,7 +52,11 @@ export default function WeekSelector({ weeks, selected, onChange }: Props) {
           </option>
         ))}
       </Select>
-      <Arrow>▾</Arrow>
+      <Arrow>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </Arrow>
     </SelectWrapper>
   );
 }
@@ -55,43 +67,69 @@ const SelectWrapper = styled.div`
   align-items: center;
 `;
 
+const SelectIcon = styled.span`
+  position: absolute;
+  left: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--c-text-muted);
+  pointer-events: none;
+  z-index: 1;
+`;
+
 const Select = styled.select`
   appearance: none;
-  background-color: var(--c-bg);
+  background: var(--c-surface);
   color: var(--c-text);
-  border: 1px solid var(--c-border-hover);
-  border-radius: 8px;
-  padding: 9px 40px 9px 14px;
-  font-size: 12px;
+  border: 1px solid var(--c-border);
+  border-radius: 10px;
+  padding: 12px 44px 12px 42px;
+  font-size: 13px;
   font-family: inherit;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
   outline: none;
-  transition: border-color 0.2s;
+  transition: all 0.2s ease;
+  min-width: 200px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
-  &:hover,
+  &:hover {
+    border-color: var(--c-border-hover);
+    background: var(--c-surface-hover);
+  }
+
   &:focus {
-    border-color: var(--c-text);
+    border-color: var(--c-accent);
+    box-shadow: 0 0 0 3px var(--c-accent-soft);
   }
 
   option {
-    background-color: var(--c-bg);
+    background: var(--c-surface);
     color: var(--c-text);
-    font-weight: 400;
+    font-weight: 500;
+    padding: 8px;
   }
 
   @media (max-width: 480px) {
-    font-size: 11px;
-    padding: 8px 36px 8px 12px;
+    font-size: 12px;
+    padding: 10px 40px 10px 38px;
+    min-width: 170px;
   }
 `;
 
 const Arrow = styled.span`
   position: absolute;
-  right: 13px;
+  right: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   pointer-events: none;
   color: var(--c-text-muted);
-  font-size: 14px;
-  line-height: 1;
+  transition: transform 0.2s ease;
+
+  ${Select}:focus + & {
+    transform: rotate(180deg);
+  }
 `;
